@@ -280,7 +280,7 @@ void setBoard20250215 (Board &board)
 	board.set (5, 8, '1');
 }
 
-int solve (Board &board, std::ostream *log)
+int solve (Board &board, bool singleStep, std::ostream *log)
 {
 	int numChanges = 0;
 	for (Cell &cell : board.m_cells)
@@ -303,8 +303,10 @@ int solve (Board &board, std::ostream *log)
 			splitIndex (idx, x, y);
 			*log << "Cell(" << x << "," << y << ") = " << symbol << "  - single candidate\n";
 		}
-		cell.set (symbol);
-		numChanges++;
+		if(singleStep)
+		{
+			return numChanges;
+	}
 	}
 
 	return numChanges;
@@ -320,7 +322,7 @@ int main()
 
 	while (!board.isSolved())
 	{
-		int numChanges = solve(board, &std::cerr);
+		int numChanges = solve(board, true, &std::cerr);
 		if (numChanges == 0)
 		{
 			break;
