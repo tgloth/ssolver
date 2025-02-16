@@ -303,10 +303,64 @@ int solve (Board &board, bool singleStep, std::ostream *log)
 			splitIndex (idx, x, y);
 			*log << "Cell(" << x << "," << y << ") = " << symbol << "  - single candidate\n";
 		}
+		cell.set (symbol);
+		numChanges++;
+		if (singleStep)
+		{
+			return numChanges;
+		}
+	}
+
+	for (const Group &group : groups)
+	{
+		for (int value=0; value<9; value++)
+		{
+			bool isSolved = false;
+			int numCandidates = 0;
+			int idxFirstCandidate = -1;
+			for (int idx : group.m_idx)
+			{
+				const Cell &cell (board.m_cells[idx]);
+				if (cell.m_isSolved)
+				{
+					if (cell.m_value == value)
+					{
+						isSolved = true;
+						break;
+					}
+				}
+				if (cell.m_isCandidate[value])
+				{
+					numCandidates++;
+					if (idxFirstCandidate < 0)
+					{
+						idxFirstCandidate = idx;
+					}
+				}
+			}
+			if (isSolved)
+			{
+				continue;
+			}
+			if (numCandidates == 1)
+			{
+				assert (idxFirstCandidate >= 0);
+				char symbol = valueToSymbol(value);
+				if (log != nullptr)
+				{
+					int x = 0, y = 0;
+					splitIndex (idxFirstCandidate, x, y);
+					*log << "Cell(" << x << "," << y << ") = " << symbol << "  - only candidate for value\n";
+				}
+				Cell &cell (board.m_cells[idxFirstCandidate]);
+				cell.set (symbol);
+				numChanges++;
 		if(singleStep)
 		{
 			return numChanges;
 	}
+	}
+		}
 	}
 
 	return numChanges;
