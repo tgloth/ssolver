@@ -38,7 +38,7 @@ public:
 				result++;
 			}
 		}
-		assert ((1 <= result) && (result <= 9));
+		assert ((0 <= result) && (result <= 9));
 		return result;
 	}
 
@@ -290,8 +290,7 @@ int solve (Board &board, std::ostream *log)
 			continue;
 		}
 		int num = cell.numCandidates();
-		assert (num > 0);
-		if (num > 1)
+		if (num != 1)
 		{
 			continue;
 		}
