@@ -27,6 +27,38 @@ public:
 		std::fill_n(m_isCandidate, 9, false);
 	}
 
+	int numCandidates() const
+	{
+		assert (!m_isSolved);
+		int result = 0;
+		for (auto &candidate : m_isCandidate)
+		{
+			if (candidate)
+			{
+				result++;
+			}
+		}
+		assert ((1 <= result) && (result <= 9));
+		return result;
+	}
+
+	int getSingleCandidate() const
+	{
+		assert (!m_isSolved);
+		int result = -1;
+		for (int i=0; i<9; i++)
+		{
+			if (!m_isCandidate[i])
+			{
+				continue;
+			}
+			assert (result == -1);
+			result = i;
+		}
+		assert (result != -1);
+		return result;
+	}
+
 	bool m_isSolved = false;
 	int m_value = -1;
 	bool m_isCandidate[9] = { true, true, true, true, true, true, true, true, true };
@@ -34,7 +66,16 @@ public:
 
 inline int makeIndex (int x, int y)
 {
+	assert ((0 <= x) && (x < 9));
+	assert ((0 <= y) && (y < 9));
 	return x + 9 * y;
+}
+
+inline void splitIndex (int idx, int &x, int &y)
+{
+	assert ((0 <= idx) && (idx < 81));
+	x = idx % 9;
+	y = idx / 9;
 }
 
 class Group
@@ -226,6 +267,37 @@ void setBoard20250215 (Board &board)
 	board.set (6, 8, '1');
 }
 
+int solve (Board &board, std::ostream *log)
+{
+	int numChanges = 0;
+	for (Cell &cell : board.m_cells)
+	{
+		if (cell.m_isSolved)
+		{
+			continue;
+		}
+		int num = cell.numCandidates();
+		assert (num > 0);
+		if (num > 1)
+		{
+			continue;
+		}
+		int value = cell.getSingleCandidate();
+		char symbol = valueToSymbol(value);
+		if (log != nullptr)
+		{
+			int idx = static_cast<int>(&cell - &board.m_cells[0]);
+			int x = 0, y = 0;
+			splitIndex (idx, x, y);
+			*log << "Cell(" << x << "," << y << ") = " << symbol << "  - single candidate\n";
+		}
+		cell.set (symbol);
+		numChanges++;
+	}
+
+	return numChanges;
+}
+
 int main()
 {
 	Board board;
@@ -233,5 +305,16 @@ int main()
 	board.initCandidates();
 	//board.print (std::cout);
 	board.printCandidates (std::cout);
+
+	while (true)
+	{
+		int numChanges = solve(board, &std::cerr);
+		if (numChanges == 0)
+		{
+			break;
+		}
+		board.initCandidates();
+		board.printCandidates (std::cout);
+	}
 }
 
