@@ -143,6 +143,7 @@ public:
 
 	void set(int x, int y, int value);
 	void initCandidates();
+	bool isSolved() const;
 
 	void print(std::ostream &);
 	void printCandidates(std::ostream &);
@@ -183,6 +184,18 @@ void Board::initCandidates()
 			}
 		}
 	}
+}
+
+bool Board::isSolved() const
+{
+	for (const Cell &cell : m_cells)
+	{
+		if (!cell.m_isSolved)
+		{
+			return false;
+		}
+	}
+	return true;
 }
 
 void Board::print(std::ostream &os)
@@ -306,7 +319,7 @@ int main()
 	//board.print (std::cout);
 	board.printCandidates (std::cout);
 
-	while (true)
+	while (!board.isSolved())
 	{
 		int numChanges = solve(board, &std::cerr);
 		if (numChanges == 0)
